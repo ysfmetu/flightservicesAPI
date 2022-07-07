@@ -23,48 +23,48 @@ public class ReservationController {
     public FlightRepository flightRepo;
     @Autowired
     public PassengerRepository passengerRepo;
+    @Autowired
     public ReservationRepository resRepo;
 
     @GetMapping("flights")
-    public List<Flight>findFlights(@RequestParam("from") String from,@RequestParam("to") String to,
-                                   @RequestParam("dateOfDeparture") @DateTimeFormat(pattern = "dd-MM-yyyy") Date departureDate){
+    public List<Flight> findFlights(@RequestParam("from") String from, @RequestParam("to") String to,
+                                    @RequestParam("dateOfDeparture") @DateTimeFormat(pattern = "dd-MM-yyyy") Date departureDate) {
 
         return flightRepo.findFlights(from, to, departureDate);
     }
 
     @PostMapping("reservations")
     @Transactional
-    public Reservation SaveReservation(CreateReservationRequest request){
-        Flight flight =flightRepo.findById(request.getFlightId()).get();
+    public Reservation SaveReservation(@RequestBody CreateReservationRequest request) {
+        Flight flight = flightRepo.findById(request.getFlightId()).get();
 
-        Passenger passenger=new Passenger();
+        Passenger passenger = new Passenger();
+
         passenger.setFirstName(request.getPassengerName());
         passenger.setLastName(request.getPassengerLastName());
         passenger.setEmail(request.getPassengerEmail());
         passenger.setPhone(request.getPassengerPhone());
+        Passenger savedPassenger = passengerRepo.save(passenger);
 
-        Passenger savedPassenger= passengerRepo.save(passenger);
+        Reservation reservation = new Reservation();
 
-        Reservation reservation =new Reservation();
         reservation.setFlight(flight);
         reservation.setPassenger(savedPassenger);
-        reservation.setCheckedIn(false);
-
+        reservation.setCheckedIn(Boolean.FALSE);
         return resRepo.save(reservation);
-
 
     }
 
     @GetMapping("reservations/{reservationId}")
-    public Reservation findReservation(@PathVariable("reservationId") Long id){
+    public Reservation findReservation(@PathVariable("reservationId") Long id) {
         return resRepo.findById(id).get();
     }
 
     @PutMapping("reservations")
-    public Reservation updateReservation(UpdateReservationRequest request){
-        Reservation reservation=resRepo.findById(request.reservationId).get();
+    public Reservation updateReservation(@RequestBody UpdateReservationRequest request) {
+        Reservation reservation = resRepo.findById(request.reservationId).get();
         reservation.setCheckedIn(request.isCheckIn());
         reservation.setNumberOfBags(request.getNumberOfBags());
-    return resRepo.save(reservation);
+        return resRepo.save(reservation);
     }
 }
