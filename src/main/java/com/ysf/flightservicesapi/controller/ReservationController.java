@@ -9,9 +9,11 @@ import com.ysf.flightservicesapi.repository.FlightRepository;
 import com.ysf.flightservicesapi.repository.PassengerRepository;
 import com.ysf.flightservicesapi.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -24,9 +26,10 @@ public class ReservationController {
     public ReservationRepository resRepo;
 
     @GetMapping("flights")
-    public List<Flight>findFlights(){
+    public List<Flight>findFlights(@RequestParam("from") String from,@RequestParam("to") String to,
+                                   @RequestParam("dateOfDeparture") @DateTimeFormat(pattern = "dd-MM-yyyy") Date departureDate){
 
-        return flightRepo.findAll();
+        return flightRepo.findFlights(from, to, departureDate);
     }
 
     @PostMapping("reservations")
@@ -56,6 +59,7 @@ public class ReservationController {
     public Reservation findReservation(@PathVariable("reservationId") Long id){
         return resRepo.findById(id).get();
     }
+
     @PutMapping("reservations")
     public Reservation updateReservation(UpdateReservationRequest request){
         Reservation reservation=resRepo.findById(request.reservationId).get();
